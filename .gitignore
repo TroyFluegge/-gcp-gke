@@ -1,0 +1,9 @@
+*.backup
+*.tfstate
+*.tfstate.*
+*.lock.info
+*.log
+**/.terraform/*
+
+.DS_Store
+.vscode/
