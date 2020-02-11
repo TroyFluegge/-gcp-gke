@@ -8,7 +8,6 @@ Run the normal Terraform commands and you should be good to go!
 
 ```terraform apply```
 
-
 Output value will be the administrative instance.  You should be able to ssh into this instance for all testing.  There will be example resources and applications in your home path.  For instance...
 
 ```kubectl apply -f ~/samples/resources/computenetwork/compute_v1beta1_computenetwork.yaml```
@@ -32,7 +31,7 @@ $ kubectl get computenetwork
 NAME                  AGE
 computenetwork-sample 8s
 ```
-You should also be able to see any provisioning errors and resource details with `kubectl describe <resourceKind> <resourceName>`
+You should also be able to see any provisioning errors and resource details with `kubectl describe <resourceKind> <resourceName>`  
 Any errors will be in the `Events` section
 ```
 $ kubectl describe computenetwork computenetwork-sample
