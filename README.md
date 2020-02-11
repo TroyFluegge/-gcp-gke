@@ -1,6 +1,7 @@
 This provides a quick way to test the capabilities of [Google's Config Connector](https://cloud.google.com/config-connector/docs)
 
 Run the normal Terraform commands and you should be good to go!
+
 ```terraform init```
 
 ```terraform plan```
