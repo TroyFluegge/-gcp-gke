@@ -1,15 +1,15 @@
-# Testing Config Connector in GKE
-
-This provides a quick way to test the capabilities of Google's Config Connector
+This provides a quick way to test the capabilities of [Google's Config Connector](https://cloud.google.com/config-connector/docs)
 
 Run the normal Terraform commands and you should be good to go!
-`terraform init`
-`terraform plan`
-`terraform apply`
+```terraform init```
+
+```terraform plan```
+
+```terraform apply```
 
 Output value will be the administrative instance.  You should be able to ssh into this instance for all testing.  There will be example resources and applications in your home path.  For instance...
 
-`kubectl apply -f ~/samples/resources/computenetwork/compute_v1beta1_computenetwork.yaml`
+```kubectl apply -f ~/samples/resources/computenetwork/compute_v1beta1_computenetwork.yaml```
 
 The above command will apply this spec.  This is a basic VPC.
 ```yaml
@@ -23,17 +23,17 @@ spec:
   routingMode: REGIONAL
   autoCreateSubnetworks: true
 ```
-At this point, you should be able to see your resources with `kubectl` commands
+At this point, you should be able to see your resources with `kubectl get <resourceKind>` commands
 
 ```
-kubectl get computenetwork
+$ kubectl get computenetwork
 NAME                  AGE
 computenetwork-sample 8s
 ```
-You should also be able to see any provisioning errors and resource details
-`kubectl describe computenetwork computenetwork-sample`
+You should also be able to see any provisioning errors and resource details with `kubectl describe <resourceKind> <resourceName>`
 Any errors will be in the `Events` section
 ```
+$ kubectl describe computenetwork computenetwork-sample
 Type    Reason    Age                  From                       Message
 ----    ------    ----                 ----                       -------
 Normal  Updating  4m35s                computenetwork-controller  Update in progress
