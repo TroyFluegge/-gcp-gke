@@ -1,13 +1,14 @@
 This provides a quick way to test the capabilities of [Google's Config Connector](https://cloud.google.com/config-connector/docs)
 
-Run the normal Terraform commands and you should be good to go!\
+Run the normal Terraform commands and you should be good to go!
 
 ```terraform init```
 
 ```terraform plan```
 
 ```terraform apply```
-\\
+
+
 Output value will be the administrative instance.  You should be able to ssh into this instance for all testing.  There will be example resources and applications in your home path.  For instance...
 
 ```kubectl apply -f ~/samples/resources/computenetwork/compute_v1beta1_computenetwork.yaml```
