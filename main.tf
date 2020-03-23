@@ -94,6 +94,7 @@ resource "google_compute_instance" "client_instance" {
   }
 }
 
+# Nothing too crazy here.. Needed a depends_on due to how long it takes to enable the service
 resource "google_container_cluster" "primary" {
   name                     = "${var.prefix}-cluster"
   location                 = var.region
