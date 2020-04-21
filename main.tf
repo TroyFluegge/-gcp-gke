@@ -72,7 +72,8 @@ resource "google_compute_instance" "client_instance" {
     connection {
       user        = var.ssh_username
       host        = self.network_interface[0].access_config[0].nat_ip
-      private_key = file(var.private_key)
+      #private_key = file(var.private_key)
+      private_key = var.private_key
     }
     inline = [
       "sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo",                                      # Added due to some of the examples using docker
