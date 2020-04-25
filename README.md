@@ -1,3 +1,7 @@
+#NEED TO UPDATE... ADDED TERRAFORM K8S OPERATOR. EXAMPLE GCP NETWORK...
+
+```kubectl apply -f gcp_network.yml -n tfc-operator```
+
 This provides a quick way to test the capabilities of [Google's Config Connector](https://cloud.google.com/config-connector/docs)
 
 Run the normal Terraform commands and you should be good to go!

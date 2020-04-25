@@ -6,6 +6,16 @@ variable "ssh_username" {
   description = "What username to use for SSH connections"
 }
 
+variable "tfc_usertoken" {
+  description = "Terraform Cloud User Token.  This will be used for the Terraform K8s Operator"
+  default     = "nothing_here_to_see"
+}
+
+variable "tfc_org" {
+  description = "Terraform Cloud Organization name.  Used in K8s manifest example"
+  default     = "nothing_here_to_see"
+}
+
 variable "gcp_creds" {
   description = "Path to your GCP credential file"
   default     = "~/.gcp/credentials.json"

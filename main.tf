@@ -1,5 +1,5 @@
 provider "google" {
-  #credentials = file("${var.gcp_creds}")
+  # credentials = file("${var.gcp_creds}") # Left in for local terraform CLI
   project     = var.gcp_project
   region      = var.region
   zone        = var.zone
@@ -48,6 +48,21 @@ resource "google_project_iam_member" "k8s-svc-role" {
   member  = "serviceAccount:${google_service_account.k8s-svc.email}"
 }
 
+data "template_file" "example" {
+  template = "${file("${path.module}/templates/gcp-network.yml.tpl")}"
+  vars = {
+    gcp_project = "${var.gcp_project}"
+    tfc_org     = "${var.tfc_org}"
+  }
+}
+
+data "template_file" "terraformrc" {
+  template = "${file("${path.module}/templates/credentials.tpl")}"
+  vars = {
+    tfc_usertoken = "${var.tfc_usertoken}"
+  }
+}
+
 # Create administrative instance that will setup Config Connector
 # The connection information is outputed
 resource "google_compute_instance" "client_instance" {
@@ -72,17 +87,16 @@ resource "google_compute_instance" "client_instance" {
     connection {
       user        = var.ssh_username
       host        = self.network_interface[0].access_config[0].nat_ip
-      #private_key = file(var.private_key)
+      #private_key = file(var.private_key)  # Left in for local terraform CLI
       private_key = var.private_key
     }
     inline = [
-      "sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo",                                      # Added due to some of the examples using docker
-      "sudo yum install -y kubectl git yum-utils device-mapper-persistent-data lvm2 docker-ce docker-ce-cli containerd.io",              # Installing tools
-      "gcloud container clusters get-credentials ${google_container_cluster.primary.name} --region ${var.region}",                       # Fetch credentials from the K8s cluster for the client
-      "gcloud iam service-accounts keys create --iam-account ${google_service_account.cnrm-system.email} key.json",                      # Create service account key
-      "kubectl create namespace ${google_service_account.cnrm-system.account_id}",                                                       # Create the K8s namespace to config connector / infrastructure resources
-      "kubectl create secret generic gcp-key --from-file key.json --namespace ${google_service_account.cnrm-system.account_id}",         # K8s secret with previously created service account key
-      "rm -Rf key.json",                                                                                                                 # Clean up the key on disk
+      "sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo",                              # Added due to some of the examples using docker
+      "sudo yum install -y kubectl git yum-utils device-mapper-persistent-data lvm2 docker-ce docker-ce-cli containerd.io",      # Installing tools
+      "gcloud container clusters get-credentials ${google_container_cluster.primary.name} --region ${var.region}",               # Fetch credentials from the K8s cluster for the client
+      "gcloud iam service-accounts keys create --iam-account ${google_service_account.cnrm-system.email} key.json",              # Create service account key
+      "kubectl create namespace ${google_service_account.cnrm-system.account_id}",                                               # Create the K8s namespace to config connector / infrastructure resources
+      "kubectl create secret generic gcp-key --from-file key.json --namespace ${google_service_account.cnrm-system.account_id}", # K8s secret with previously created service account key
       "gsutil cp gs://cnrm/latest/release-bundle.tar.gz release-bundle.tar.gz",                                                          # Download config connector install
       "tar zxvf release-bundle.tar.gz",                                                                                                  # Extract tar file
       "kubectl apply -f install-bundle-gcp-identity/",                                                                                   # Apply the config connector manifests
@@ -90,7 +104,18 @@ resource "google_compute_instance" "client_instance" {
       "kubectl annotate namespace ${google_service_account.cnrm-system.account_id} cnrm.cloud.google.com/project-id=${var.gcp_project}", # Needed to default the project ID.. errors occur without this
       "curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash",                                               # helm install...bash from curl yolo
       "curl -s https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh  | bash",                    # kustomize install...yolo again
-      "sudo mv kustomize /usr/local/bin"
+      "sudo mv kustomize /usr/local/bin",
+      "kubectl create ns tfc-operator",
+      "sudo mkdir /etc/terraform",
+      "sudo cat > ~/credentials <<EOL\n${data.template_file.terraformrc.rendered}\nEOL",
+      "sudo mv credentials /etc/terraform/credentials",
+      "kubectl create -n tfc-operator secret generic terraformrc --from-file=/etc/terraform/credentials",
+      "tr '\n' ' ' < key.json >> new.json",
+      "kubectl create -n tfc-operator secret generic workspacesecrets --from-file=GOOGLE_CREDENTIALS=new.json",
+      "sudo cat > ~/gcp_network.yml <<EOL\n${data.template_file.example.rendered}\nEOL",
+      "sudo git clone https://github.com/hashicorp/terraform-helm",
+      "helm install -n tfc-operator operator ./terraform-helm --set=\"global.enabled=true\"",
+      "rm -Rf *.json" # Clean up the key on disk
     ]
   }
 }
